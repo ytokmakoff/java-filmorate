@@ -16,6 +16,7 @@ class FilmControllerTest {
     void init() {
         filmController = new FilmController();
     }
+
     @Test
     void correctValues() throws ValidationException {
         Film film = Film.builder()
@@ -68,6 +69,7 @@ class FilmControllerTest {
         film2.setId(100);
         assertThrows(ValidationException.class, () -> filmController.updateExistingFilm(film2));
     }
+
     @Test
     void nameCanNotBeEmpty() {
         Film film = Film.builder()

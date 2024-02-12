@@ -80,6 +80,7 @@ class UserControllerTest {
                 .build();
         assertThrows(ValidationException.class, () -> userController.saveUser(user));
     }
+
     @Test
     void emailShouldContainsAt() {
         User user = User.builder()
