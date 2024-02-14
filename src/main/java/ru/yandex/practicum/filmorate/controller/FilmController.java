@@ -17,23 +17,23 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
     private int generateId = 1;
-    Map<Integer, Film> filmMap = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
 
     @PostMapping
-    Film saveFilm(@RequestBody Film film) throws ValidationException {
+    public Film saveFilm(@RequestBody Film film) throws ValidationException {
         validateFilm(film);
         film.setId(generateId());
         log.info("Film created: {}", film);
-        filmMap.put(film.getId(), film);
+        films.put(film.getId(), film);
 
         return film;
     }
 
     @PutMapping
-    Film updateExistingFilm(@RequestBody Film film) throws ValidationException {
+    public Film updateExistingFilm(@RequestBody Film film) throws ValidationException {
         validateFilm(film);
-        if (filmMap.containsKey(film.getId())) {
-            filmMap.put(film.getId(), film);
+        if (films.containsKey(film.getId())) {
+            films.put(film.getId(), film);
             log.info("Film updated: {}", film);
         } else {
             log.warn("Film with id {} not exist", film.getId());
@@ -46,7 +46,7 @@ public class FilmController {
     @GetMapping
     public List<Film> getAllFilms() {
         log.info("Retrieving list of films");
-        return new ArrayList<>(filmMap.values());
+        return new ArrayList<>(films.values());
     }
 
     private boolean validateFilm(Film film) throws ValidationException {

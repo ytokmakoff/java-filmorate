@@ -17,10 +17,10 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UserController {
     private int generateId = 1;
-    Map<Integer, User> userMap = new HashMap<>();
+    private final Map<Integer, User> userMap = new HashMap<>();
 
     @PostMapping
-    User saveUser(@RequestBody User user) throws ValidationException {
+    public User saveUser(@RequestBody User user) throws ValidationException {
         validateUser(user);
         user.setId(generateId());
         userMap.put(user.getId(), user);
@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PutMapping
-    User updateExistingUser(@RequestBody User user) throws ValidationException {
+    public User updateExistingUser(@RequestBody User user) throws ValidationException {
         validateUser(user);
         if (userMap.containsKey(user.getId())) {
             userMap.put(user.getId(), user);
@@ -43,7 +43,7 @@ public class UserController {
     }
 
     @GetMapping
-    List<User> getAllUsers() {
+    public List<User> getAllUsers() {
         log.info("Retrieving all users");
         return new ArrayList<>(userMap.values());
     }

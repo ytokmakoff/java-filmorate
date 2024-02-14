@@ -9,9 +9,9 @@ import lombok.*;
 @Builder
 @ToString
 public class Film {
-    int id;
-    String name;
-    String description;
-    String releaseDate;
-    int duration;
+    private int id;
+    private String name;
+    private String description;
+    private String releaseDate;
+    private int duration;
 }
