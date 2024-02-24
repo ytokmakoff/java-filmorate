@@ -4,16 +4,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
 @Builder
 @ToString
 public class User {
-    private int id;
+    private final Set<Integer> friends = new HashSet<>();
+    private int id;m
     private String email;
     private String login;
     private String name;
     private String birthday;
-    private Set<Integer> friends;
 }
