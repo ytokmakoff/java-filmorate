@@ -34,7 +34,7 @@ public class FilmController {
 
     @GetMapping("{id}")
     public Film filmById(@PathVariable int id) {
-        return filmService
+        return filmService.filmById(id);
     }
 
     @PutMapping("{id}/like/{userId}")
