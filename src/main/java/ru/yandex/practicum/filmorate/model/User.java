@@ -12,7 +12,7 @@ import java.util.Set;
 @ToString
 public class User {
     private final Set<Integer> friends = new HashSet<>();
-    private int id;m
+    private int id;
     private String email;
     private String login;
     private String name;
