@@ -12,8 +12,9 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class InMemoryUserStorage implements UserStorage{
+public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> userMap = new HashMap<>();
+
     @Override
     public User saveUser(User user) {
         userMap.put(user.getId(), user);

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
@@ -17,8 +18,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FilmService {
-    private int generateId = 1;
     private final InMemoryFilmStorage inMemoryFilmStorage;
+    private int generateId = 1;
 
     @Autowired
     public FilmService(InMemoryFilmStorage filmStorage) {
@@ -35,6 +36,9 @@ public class FilmService {
     }
 
     public Film updateExistingFilm(Film film) throws ValidationException {
+        if (inMemoryFilmStorage.getFilmById(film.getId()) == null) {
+            throw new FilmNotFoundException("Film not found");
+        }
         validateFilm(film);
         inMemoryFilmStorage.updateExistingFilm(film);
         return film;
@@ -60,6 +64,8 @@ public class FilmService {
     }
 
     public void removeLike(int id, int userId) {
+        if (userId <= 0)
+            throw new UserNotFoundException("user not found");
         if (inMemoryFilmStorage.getFilmById(id) != null) {
             inMemoryFilmStorage.getFilmById(id).getLikes().remove(userId);
         } else {
@@ -69,7 +75,7 @@ public class FilmService {
 
     public List<Film> getPopularFilms(int count) {
         return inMemoryFilmStorage.getAllFilms().stream()
-                .sorted(Comparator.comparingInt(o -> o.getLikes().size()))
+                .sorted(Comparator.comparingInt(o -> o.getLikes().size() * -1))
                 .limit(count)
                 .collect(Collectors.toList());
     }

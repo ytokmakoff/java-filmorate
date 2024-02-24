@@ -12,14 +12,13 @@ import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserService {
-    private int generateId = 1;
     private final InMemoryUserStorage inMemoryUserStorage;
+    private int generateId = 1;
 
     @Autowired
     public UserService(InMemoryUserStorage inMemoryUserStorage) {
@@ -41,6 +40,7 @@ public class UserService {
         inMemoryUserStorage.updateExistingUser(user);
         return user;
     }
+
     public User userById(int id) {
         if (inMemoryUserStorage.getUserById(id) == null) {
             throw new UserNotFoundException("User not found");
@@ -71,16 +71,21 @@ public class UserService {
         }
     }
 
-    public Set<Integer> userFriends(int id) {
-        return inMemoryUserStorage.getUserById(id).getFriends();
+    public List<User> userFriends(int id) {
+        if (inMemoryUserStorage.getUserById(id) == null)
+            throw new UserNotFoundException("User not found");
+        return inMemoryUserStorage.getUserById(id).getFriends().stream()
+                .map(inMemoryUserStorage::getUserById)
+                .collect(Collectors.toList());
     }
 
-    public List<Integer> mutualFriends(int id, int otherId) {
+    public List<User> mutualFriends(int id, int otherId) {
         if (inMemoryUserStorage.getUserById(id) == null || inMemoryUserStorage.getUserById(otherId) == null) {
             throw new UserNotFoundException("user not found");
         }
         return inMemoryUserStorage.getUserById(id).getFriends().stream()
                 .filter(u -> (inMemoryUserStorage.getUserById(otherId)).getFriends().contains(u))
+                .map(inMemoryUserStorage::getUserById)
                 .collect(Collectors.toList());
     }
 

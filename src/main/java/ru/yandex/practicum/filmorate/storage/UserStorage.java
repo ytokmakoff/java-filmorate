@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface UserStorage {
     User saveUser(User user);
+
     User updateExistingUser(User user) throws ValidationException;
+
     List<User> getAllUsers();
 }

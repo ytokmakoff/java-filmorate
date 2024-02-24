@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface FilmStorage {
     Film saveFilm(Film film);
+
     Film updateExistingFilm(Film film) throws ValidationException;
+
     List<Film> getAllFilms();
 }

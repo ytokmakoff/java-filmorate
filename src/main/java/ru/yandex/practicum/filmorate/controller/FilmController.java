@@ -47,7 +47,7 @@ public class FilmController {
         filmService.removeLike(id, userId);
     }
 
-    @GetMapping("popular?count={count}")
+    @GetMapping("popular")
     public List<Film> getPopularFilms(@RequestParam(required = false, defaultValue = "10") int count) {
         if (count <= 0) {
             throw new IllegalArgumentException("count <= 0");
