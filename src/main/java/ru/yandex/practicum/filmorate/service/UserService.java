@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -40,6 +41,12 @@ public class UserService {
         validateUser(user);
         inMemoryUserStorage.updateExistingUser(user);
         return user;
+    }
+    public User userById(int id) {
+        if (inMemoryUserStorage.getUserById(id) == null) {
+            throw new UserNotFoundException("User not found");
+        }
+        return inMemoryUserStorage.getUserById(id);
     }
 
     public List<User> getAllUsers() {
