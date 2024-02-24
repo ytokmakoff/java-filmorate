@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -77,8 +76,11 @@ public class UserService {
     }
 
     public List<Integer> mutualFriends(int id, int otherId) {
+        if (inMemoryUserStorage.getUserById(id) == null || inMemoryUserStorage.getUserById(otherId) == null) {
+            throw new UserNotFoundException("user not found");
+        }
         return inMemoryUserStorage.getUserById(id).getFriends().stream()
-                .filter(u -> inMemoryUserStorage.getUserById(otherId).getFriends().contains(u))
+                .filter(u -> (inMemoryUserStorage.getUserById(otherId)).getFriends().contains(u))
                 .collect(Collectors.toList());
     }
 
