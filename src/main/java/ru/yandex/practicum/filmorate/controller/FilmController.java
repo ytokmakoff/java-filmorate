@@ -32,6 +32,11 @@ public class FilmController {
         return film;
     }
 
+    @GetMapping("{id}")
+    public Film filmById(@PathVariable int id) {
+        return filmService
+    }
+
     @PutMapping("{id}/like/{userId}")
     public void likeFilm(@PathVariable int id, @PathVariable int userId) {
         filmService.likeFilm(id, userId);

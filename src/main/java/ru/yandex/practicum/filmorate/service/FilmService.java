@@ -40,6 +40,13 @@ public class FilmService {
         return film;
     }
 
+    public Film filmById(int id) {
+        if (inMemoryFilmStorage.getFilmById(id) == null) {
+            throw new FilmNotFoundException("Film not found");
+        }
+        return inMemoryFilmStorage.getFilmById(id);
+    }
+
     public List<Film> getAllFilms() {
         return inMemoryFilmStorage.getAllFilms();
     }
