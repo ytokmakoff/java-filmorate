@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -69,7 +70,7 @@ class FilmControllerTest {
                 .duration(120)
                 .build();
         film2.setId(100);
-        assertThrows(ValidationException.class, () -> filmController.updateExistingFilm(film2));
+        assertThrows(FilmNotFoundException.class, () -> filmController.updateExistingFilm(film2));
     }
 
     @Test
