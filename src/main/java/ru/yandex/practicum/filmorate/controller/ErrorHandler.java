@@ -17,21 +17,21 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidationException(ValidationException e) {
-        log.error("HandleValidationException \n{}", e.getMessage());
+        log.error("HandleValidationException\n{}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFound(RuntimeException e) {
-        log.error("FilmNotFoundException or UserNotFoundException\n {}", e.getMessage());
+        log.error("FilmNotFoundException or UserNotFoundException\n{}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleException(Exception e) {
-        log.error("handleException \n{}", e.getMessage());
+        log.error("handleException\n{}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 }
