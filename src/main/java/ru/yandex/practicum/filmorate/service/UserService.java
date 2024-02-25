@@ -29,26 +29,32 @@ public class UserService {
         validateUser(user);
         user.setId(generateId());
         inMemoryUserStorage.saveUser(user);
+        log.info("user: {} saved", user);
         return user;
     }
 
     public User updateExistingUser(@RequestBody User user) throws ValidationException {
         if (inMemoryUserStorage.getUserById(user.getId()) == null) {
+            log.warn("user: {} not found", user);
             throw new UserNotFoundException("User not found");
         }
         validateUser(user);
         inMemoryUserStorage.updateExistingUser(user);
+        log.info("user: {} updated", user);
         return user;
     }
 
     public User userById(int id) {
         if (inMemoryUserStorage.getUserById(id) == null) {
+            log.warn("user with id: {} not found", id);
             throw new UserNotFoundException("User not found");
         }
+        log.info("user by id: {} received", id);
         return inMemoryUserStorage.getUserById(id);
     }
 
     public List<User> getAllUsers() {
+        log.info("got all users");
         return inMemoryUserStorage.getAllUsers();
     }
 
@@ -58,6 +64,7 @@ public class UserService {
             inMemoryUserStorage.getUserById(friendId).getFriends().add(id);
             log.info("friends added");
         } else {
+            log.warn("user with id {} or {} not found", id, friendId);
             throw new UserNotFoundException("User not found");
         }
     }
@@ -67,13 +74,17 @@ public class UserService {
             inMemoryUserStorage.getUserById(id).getFriends().remove(friendId);
             inMemoryUserStorage.getUserById(friendId).getFriends().remove(id);
         } else {
+            log.warn("user with id {} or {} not found", id, friendId);
             throw new UserNotFoundException("User not found");
         }
     }
 
     public List<User> userFriends(int id) {
-        if (inMemoryUserStorage.getUserById(id) == null)
+        if (inMemoryUserStorage.getUserById(id) == null) {
+            log.warn("user with id: {} not found", id);
             throw new UserNotFoundException("User not found");
+        }
+        log.info("received user: {} friend", id);
         return inMemoryUserStorage.getUserById(id).getFriends().stream()
                 .map(inMemoryUserStorage::getUserById)
                 .collect(Collectors.toList());
@@ -81,8 +92,10 @@ public class UserService {
 
     public List<User> mutualFriends(int id, int otherId) {
         if (inMemoryUserStorage.getUserById(id) == null || inMemoryUserStorage.getUserById(otherId) == null) {
+            log.warn("user with id {} or {} not found", id, otherId);
             throw new UserNotFoundException("user not found");
         }
+        log.info("received mutualFriends between two users with ids {} and {}", id, otherId);
         return inMemoryUserStorage.getUserById(id).getFriends().stream()
                 .filter(u -> (inMemoryUserStorage.getUserById(otherId)).getFriends().contains(u))
                 .map(inMemoryUserStorage::getUserById)

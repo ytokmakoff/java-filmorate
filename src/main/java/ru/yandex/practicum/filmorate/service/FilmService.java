@@ -31,49 +31,61 @@ public class FilmService {
         film.setId(generateId());
 
         inMemoryFilmStorage.saveFilm(film);
-
+        log.info("film {} saved", film);
         return film;
     }
 
     public Film updateExistingFilm(Film film) throws ValidationException {
         if (inMemoryFilmStorage.getFilmById(film.getId()) == null) {
+            log.warn("film: {} not found", film);
             throw new FilmNotFoundException("Film not found");
         }
         validateFilm(film);
         inMemoryFilmStorage.updateExistingFilm(film);
+        log.info("film {} updated", film);
         return film;
     }
 
     public Film filmById(int id) {
         if (inMemoryFilmStorage.getFilmById(id) == null) {
+            log.warn("film with id: {} not found", id);
             throw new FilmNotFoundException("Film not found");
         }
+        log.info("film with id: {} received", id);
         return inMemoryFilmStorage.getFilmById(id);
     }
 
     public List<Film> getAllFilms() {
+        log.info("all films received");
         return inMemoryFilmStorage.getAllFilms();
     }
 
     public void likeFilm(int id, int userId) {
         if (inMemoryFilmStorage.getFilmById(id) != null) {
             inMemoryFilmStorage.getFilmById(id).getLikes().add(userId);
+            log.info("film with id: {} liked with userId: {}", id, userId);
         } else {
+            log.warn("film with id: {} not found", id);
             throw new FilmNotFoundException("Film not found");
         }
     }
 
     public void removeLike(int id, int userId) {
-        if (userId <= 0)
+        if (userId <= 0) {
+            log.warn("user with id: {} not found", userId);
             throw new UserNotFoundException("user not found");
+        }
         if (inMemoryFilmStorage.getFilmById(id) != null) {
             inMemoryFilmStorage.getFilmById(id).getLikes().remove(userId);
+            log.info("film with id: {} like removed", id);
         } else {
+            log.warn("film with id: {} not found", id);
             throw new FilmNotFoundException("Film not found");
         }
     }
 
     public List<Film> getPopularFilms(int count) {
+        log.info("Retrieving list of popular films");
         return inMemoryFilmStorage.getAllFilms().stream()
                 .sorted(Comparator.comparingInt(o -> o.getLikes().size() * -1))
                 .limit(count)

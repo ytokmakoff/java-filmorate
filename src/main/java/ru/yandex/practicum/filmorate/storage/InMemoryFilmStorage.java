@@ -18,7 +18,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film saveFilm(Film film) {
         films.put(film.getId(), film);
-        log.info("Film saved: {}", film);
         return film;
     }
 
@@ -26,9 +25,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film updateExistingFilm(Film film) throws ValidationException {
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
-            log.info("Film updated: {}", film);
         } else {
-            log.warn("Film with id {} not exist", film.getId());
             throw new ValidationException("Film id not exist");
         }
         return film;
@@ -36,7 +33,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        log.info("Retrieving list of films");
         return new ArrayList<>(films.values());
     }
 

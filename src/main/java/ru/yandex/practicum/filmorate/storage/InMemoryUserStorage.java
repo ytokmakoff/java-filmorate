@@ -18,7 +18,6 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User saveUser(User user) {
         userMap.put(user.getId(), user);
-        log.info("User saved: {}", user);
         return user;
     }
 
@@ -26,9 +25,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateExistingUser(User user) throws ValidationException {
         if (userMap.containsKey(user.getId())) {
             userMap.put(user.getId(), user);
-            log.info("User with id {} updated", user.getId());
         } else {
-            log.warn("User with id {} not exist", user.getId());
             throw new ValidationException("User id not exist");
         }
         return user;
@@ -36,7 +33,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> getAllUsers() {
-        log.info("Retrieving all users");
         return new ArrayList<>(userMap.values());
     }
 
