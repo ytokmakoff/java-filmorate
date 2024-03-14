@@ -60,8 +60,13 @@ public class UserService {
 
     public void addFriend(int id, int friendId) {
         if (inMemoryUserStorage.getUserById(id) != null && inMemoryUserStorage.getUserById(friendId) != null) {
-            inMemoryUserStorage.getUserById(id).getFriends().add(friendId);
-            inMemoryUserStorage.getUserById(friendId).getFriends().add(id);
+            if (inMemoryUserStorage.getUserById(friendId).getUnconfirmedFriends().contains(id)) {
+                inMemoryUserStorage.getUserById(friendId).getUnconfirmedFriends().remove(id);
+                inMemoryUserStorage.getUserById(friendId).getFriends().add(id);
+                inMemoryUserStorage.getUserById(id).getFriends().add(friendId);
+            } else {
+                inMemoryUserStorage.getUserById(id).getUnconfirmedFriends().add(friendId);
+            }
             log.info("friends added");
         } else {
             log.warn("user with id {} or {} not found", id, friendId);
@@ -71,8 +76,13 @@ public class UserService {
 
     public void removeFriend(int id, int friendId) {
         if (inMemoryUserStorage.getUserById(id) != null && inMemoryUserStorage.getUserById(friendId) != null) {
-            inMemoryUserStorage.getUserById(id).getFriends().remove(friendId);
-            inMemoryUserStorage.getUserById(friendId).getFriends().remove(id);
+            if (inMemoryUserStorage.getUserById(id).getFriends().contains(friendId)) {
+                inMemoryUserStorage.getUserById(friendId).getFriends().remove(id);
+                inMemoryUserStorage.getUserById(friendId).getUnconfirmedFriends().add(id);
+                inMemoryUserStorage.getUserById(id).getFriends().remove(friendId);
+            } else {
+                inMemoryUserStorage.getUserById(id).getUnconfirmedFriends().remove(friendId);
+            }
         } else {
             log.warn("user with id {} or {} not found", id, friendId);
             throw new UserNotFoundException("User not found");

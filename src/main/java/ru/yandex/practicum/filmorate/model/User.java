@@ -12,6 +12,8 @@ import java.util.Set;
 @ToString
 public class User {
     private final Set<Integer> friends = new HashSet<>();
+    private final Set<Integer> unconfirmedFriends = new HashSet<>();
+
     private int id;
     private String email;
     private String login;
