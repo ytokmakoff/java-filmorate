@@ -3,8 +3,11 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +17,7 @@ class UserControllerTest {
 
     @BeforeEach
     void init() {
-        userController = new UserController();
+        userController = new UserController(new UserService(new InMemoryUserStorage()));
     }
 
     @Test
@@ -67,7 +70,7 @@ class UserControllerTest {
                 .birthday("1999-08-20")
                 .build();
         user2.setId(100);
-        assertThrows(ValidationException.class, () -> userController.updateExistingUser(user2));
+        assertThrows(UserNotFoundException.class, () -> userController.updateExistingUser(user2));
     }
 
     @Test
