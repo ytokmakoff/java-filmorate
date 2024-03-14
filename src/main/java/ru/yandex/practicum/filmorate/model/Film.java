@@ -20,4 +20,6 @@ public class Film {
     private String description;
     private String releaseDate;
     private int duration;
+    private FilmGenre genre;
+    private FilmRating rating;
 }
