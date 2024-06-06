@@ -18,6 +18,7 @@ import java.util.List;
 public class FilmService {
     private final JdbcFilmRepository jdbcFilmRepository;
     private final JdbcUserRepository jdbcUserRepository;
+
     public FilmService(JdbcFilmRepository jdbcFilmRepository, JdbcUserRepository jdbcUserRepository) {
         this.jdbcFilmRepository = jdbcFilmRepository;
         this.jdbcUserRepository = jdbcUserRepository;
@@ -29,6 +30,7 @@ public class FilmService {
         log.info("film {} saved", film);
         return film;
     }
+
     public Film updateFilm(Film film) throws ValidationException {
         if (jdbcFilmRepository.getById(film.getId()).isEmpty()) {
             log.warn("film: {} not found", film);

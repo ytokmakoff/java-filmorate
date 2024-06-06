@@ -13,11 +13,11 @@ public enum FilmGenre {
     Documentary(5),
     Action(6);
 
+    private final int id;
+
     FilmGenre(int id) {
         this.id = id;
     }
-
-    private final int id;
 
     public static String filmGenreIdToString(int id) {
         return switch (id) {
