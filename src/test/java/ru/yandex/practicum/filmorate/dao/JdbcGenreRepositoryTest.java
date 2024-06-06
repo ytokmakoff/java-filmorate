@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(JdbcGenreRepository.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class JdbcGenreRepositoryTest {
-    final static int TEST_ID = 1;
+    static final int TEST_ID = 1;
     final JdbcGenreRepository jdbc;
 
     static GenreDto getTestGenre() {
