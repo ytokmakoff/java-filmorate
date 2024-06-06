@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface MpaRepository {
     Optional<MpaRatingDto> getById(int id);
+
     List<MpaRatingDto> getAll();
 }
