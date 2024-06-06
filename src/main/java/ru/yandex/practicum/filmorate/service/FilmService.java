@@ -1,95 +1,75 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.JdbcFilmRepository;
+import ru.yandex.practicum.filmorate.dao.JdbcUserRepository;
+import ru.yandex.practicum.filmorate.dto.GenreDto;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class FilmService {
-    private final InMemoryFilmStorage inMemoryFilmStorage;
-    private int generateId = 1;
-
-    @Autowired
-    public FilmService(InMemoryFilmStorage filmStorage) {
-        this.inMemoryFilmStorage = filmStorage;
+    private final JdbcFilmRepository jdbcFilmRepository;
+    private final JdbcUserRepository jdbcUserRepository;
+    public FilmService(JdbcFilmRepository jdbcFilmRepository, JdbcUserRepository jdbcUserRepository) {
+        this.jdbcFilmRepository = jdbcFilmRepository;
+        this.jdbcUserRepository = jdbcUserRepository;
     }
 
-    public Film saveFilm(Film film) throws ValidationException {
+    public Film createFilm(Film film) throws ValidationException {
         validateFilm(film);
-        film.setId(generateId());
-
-        inMemoryFilmStorage.saveFilm(film);
+        jdbcFilmRepository.create(film);
         log.info("film {} saved", film);
         return film;
     }
-
-    public Film updateExistingFilm(Film film) throws ValidationException {
-        if (inMemoryFilmStorage.getFilmById(film.getId()) == null) {
+    public Film updateFilm(Film film) throws ValidationException {
+        if (jdbcFilmRepository.getById(film.getId()).isEmpty()) {
             log.warn("film: {} not found", film);
             throw new FilmNotFoundException("Film not found");
         }
         validateFilm(film);
-        inMemoryFilmStorage.updateExistingFilm(film);
+        jdbcFilmRepository.update(film);
         log.info("film {} updated", film);
         return film;
     }
 
     public Film filmById(int id) {
-        if (inMemoryFilmStorage.getFilmById(id) == null) {
+        if (jdbcFilmRepository.getById(id).isEmpty()) {
             log.warn("film with id: {} not found", id);
             throw new FilmNotFoundException("Film not found");
         }
         log.info("film with id: {} received", id);
-        return inMemoryFilmStorage.getFilmById(id);
+        return jdbcFilmRepository.getById(id).get();
     }
 
     public List<Film> getAllFilms() {
         log.info("all films received");
-        return inMemoryFilmStorage.getAllFilms();
+        return jdbcFilmRepository.getAll();
     }
 
     public void likeFilm(int id, int userId) {
-        if (inMemoryFilmStorage.getFilmById(id) != null) {
-            inMemoryFilmStorage.getFilmById(id).getLikes().add(userId);
-            log.info("film with id: {} liked with userId: {}", id, userId);
-        } else {
-            log.warn("film with id: {} not found", id);
-            throw new FilmNotFoundException("Film not found");
-        }
+        if (jdbcFilmRepository.getById(id).isEmpty())
+            throw new FilmNotFoundException("film not found");
+        if (jdbcUserRepository.getById(userId).isEmpty())
+            throw new UserNotFoundException("user not found");
+        log.info("Film and user exist, proceeding to add like...");
+        jdbcFilmRepository.addLike(id, userId);
     }
 
     public void removeLike(int id, int userId) {
-        if (userId <= 0) {
-            log.warn("user with id: {} not found", userId);
-            throw new UserNotFoundException("user not found");
-        }
-        if (inMemoryFilmStorage.getFilmById(id) != null) {
-            inMemoryFilmStorage.getFilmById(id).getLikes().remove(userId);
-            log.info("film with id: {} like removed", id);
-        } else {
-            log.warn("film with id: {} not found", id);
-            throw new FilmNotFoundException("Film not found");
-        }
+        jdbcFilmRepository.deleteLike(id, userId);
     }
 
     public List<Film> getPopularFilms(int count) {
         log.info("Retrieving list of popular films");
-        return inMemoryFilmStorage.getAllFilms().stream()
-                .sorted(Comparator.comparingInt(o -> o.getLikes().size() * -1))
-                .limit(count)
-                .collect(Collectors.toList());
+        return jdbcFilmRepository.getPopular(count);
     }
 
     private boolean validateFilm(Film film) throws ValidationException {
@@ -101,20 +81,36 @@ public class FilmService {
             log.warn("film description length: {} > 200", film.getDescription().length());
             throw new ValidationException("film description length > 200");
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        if (LocalDate.parse(film.getReleaseDate(), formatter)
-                .isBefore(LocalDate.of(1895, 12, 28))) {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             log.warn("film release date: {} is before 1895.12.28", film.getReleaseDate());
             throw new ValidationException("film release date is before 1895.12.28");
+        }
+        if (film.getGenres() != null) {
+            for (GenreDto genre : film.getGenres()) {
+                if (genre.getId() > 6) {
+                    log.warn("film rating > 6 {}", genre.getId());
+                    throw new ValidationException("film rating > 6");
+                }
+                if (genre.getId() < 0) {
+                    log.warn("film rating > 0 {}", genre.getId());
+                    throw new ValidationException("film rating > 0");
+                }
+            }
+        }
+        if (film.getMpa() != null) {
+            if (film.getMpa().getId() > 5) {
+                log.warn("film mpaId > 5: mapId = {}", film.getMpa().getId());
+                throw new ValidationException("film mpa id > 5");
+            }
+            if (film.getMpa().getId() < 0) {
+                log.warn("film mpaId < 0: mpaId = {}", film.getMpa().getId());
+                throw new ValidationException("film mpa id < 0");
+            }
         }
         if (film.getDuration() < 0) {
             log.warn("film duration: {} < 0", film.getDuration());
             throw new ValidationException("film duration: < 0");
         }
         return true;
-    }
-
-    private int generateId() {
-        return generateId++;
     }
 }

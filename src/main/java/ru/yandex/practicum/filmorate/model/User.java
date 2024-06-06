@@ -1,22 +1,16 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDate;
 
 @Data
-@Builder
 @ToString
 public class User {
-    private final Set<Integer> friends = new HashSet<>();
-    private final Set<Integer> unconfirmedFriends = new HashSet<>();
-
-    private int id;
+    private long id;
     private String email;
     private String login;
     private String name;
-    private String birthday;
+    private LocalDate birthday;
 }
