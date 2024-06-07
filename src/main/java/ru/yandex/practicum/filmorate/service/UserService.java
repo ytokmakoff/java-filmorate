@@ -1,146 +1,131 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import ru.yandex.practicum.filmorate.dao.JdbcUserRepository;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    private final InMemoryUserStorage inMemoryUserStorage;
-    private int generateId = 1;
+    private final JdbcUserRepository jdbcUserRepository;
 
-    @Autowired
-    public UserService(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
-    }
-
-    public User saveUser(@RequestBody User user) throws ValidationException {
+    public User createUser(@RequestBody User user) throws ValidationException {
         validateUser(user);
-        user.setId(generateId());
-        inMemoryUserStorage.saveUser(user);
-        log.info("user: {} saved", user);
+        log.info("Validated user: {}", user);
+        jdbcUserRepository.create(user);
+        log.info("Saved user: {}", user);
         return user;
     }
 
-    public User updateExistingUser(@RequestBody User user) throws ValidationException {
-        if (inMemoryUserStorage.getUserById(user.getId()) == null) {
-            log.warn("user: {} not found", user);
+    public User updateUser(@RequestBody User user) throws ValidationException {
+        if (jdbcUserRepository.getById(user.getId()).isEmpty()) {
+            log.warn("User not found: {}", user);
             throw new UserNotFoundException("User not found");
         }
         validateUser(user);
-        inMemoryUserStorage.updateExistingUser(user);
-        log.info("user: {} updated", user);
+        log.info("Validated user: {}", user);
+        jdbcUserRepository.update(user);
+        log.info("Updated user: {}", user);
         return user;
     }
 
-    public User userById(int id) {
-        if (inMemoryUserStorage.getUserById(id) == null) {
-            log.warn("user with id: {} not found", id);
+    public User getUserById(int id) {
+        if (jdbcUserRepository.getById(id).isEmpty()) {
+            log.warn("User with id: {} not found", id);
             throw new UserNotFoundException("User not found");
         }
-        log.info("user by id: {} received", id);
-        return inMemoryUserStorage.getUserById(id);
+        User user = jdbcUserRepository.getById(id).get();
+        log.info("Retrieved user by id: {}", id);
+        return user;
     }
 
-    public List<User> getAllUsers() {
-        log.info("got all users");
-        return inMemoryUserStorage.getAllUsers();
+    public List<User> allUsers() {
+        List<User> users = jdbcUserRepository.getAll();
+        log.info("Retrieved add users total: {}", users.size());
+        return users;
     }
 
     public void addFriend(int id, int friendId) {
-        if (inMemoryUserStorage.getUserById(id) != null && inMemoryUserStorage.getUserById(friendId) != null) {
-            if (inMemoryUserStorage.getUserById(friendId).getUnconfirmedFriends().contains(id)) {
-                inMemoryUserStorage.getUserById(friendId).getUnconfirmedFriends().remove(id);
-                inMemoryUserStorage.getUserById(friendId).getFriends().add(id);
-                inMemoryUserStorage.getUserById(id).getFriends().add(friendId);
-            } else {
-                inMemoryUserStorage.getUserById(id).getUnconfirmedFriends().add(friendId);
-            }
-            log.info("friends added");
-        } else {
-            log.warn("user with id {} or {} not found", id, friendId);
+        if (jdbcUserRepository.getById(id).isEmpty()) {
+            log.warn("User with id: {} not found", id);
             throw new UserNotFoundException("User not found");
         }
+        if (jdbcUserRepository.getById(friendId).isEmpty()) {
+            log.warn("User with id: {} not found", friendId);
+            throw new UserNotFoundException("User not found");
+        }
+        jdbcUserRepository.addFriend(id, friendId);
     }
 
     public void removeFriend(int id, int friendId) {
-        if (inMemoryUserStorage.getUserById(id) != null && inMemoryUserStorage.getUserById(friendId) != null) {
-            if (inMemoryUserStorage.getUserById(id).getFriends().contains(friendId)) {
-                inMemoryUserStorage.getUserById(friendId).getFriends().remove(id);
-                inMemoryUserStorage.getUserById(friendId).getUnconfirmedFriends().add(id);
-                inMemoryUserStorage.getUserById(id).getFriends().remove(friendId);
-            } else {
-                inMemoryUserStorage.getUserById(id).getUnconfirmedFriends().remove(friendId);
-            }
-        } else {
-            log.warn("user with id {} or {} not found", id, friendId);
+        if (jdbcUserRepository.getById(id).isEmpty()) {
+            log.warn("User with id: {} not found", id);
             throw new UserNotFoundException("User not found");
         }
+        if (jdbcUserRepository.getById(friendId).isEmpty()) {
+            log.warn("User with id: {} not found", friendId);
+            throw new UserNotFoundException("User not found");
+        }
+        jdbcUserRepository.deleteFriend(id, friendId);
     }
 
     public List<User> userFriends(int id) {
-        if (inMemoryUserStorage.getUserById(id) == null) {
-            log.warn("user with id: {} not found", id);
+        if (jdbcUserRepository.getById(id).isEmpty()) {
+            log.warn("User with id: {} not found", id);
             throw new UserNotFoundException("User not found");
         }
-        log.info("received user: {} friend", id);
-        return inMemoryUserStorage.getUserById(id).getFriends().stream()
-                .map(inMemoryUserStorage::getUserById)
-                .collect(Collectors.toList());
+        List<User> friends = jdbcUserRepository.getFriends(id);
+        log.info("Retrieved user with id: {} friends total: {}", id, friends.size());
+        return friends;
     }
 
-    public List<User> mutualFriends(int id, int otherId) {
-        if (inMemoryUserStorage.getUserById(id) == null || inMemoryUserStorage.getUserById(otherId) == null) {
-            log.warn("user with id {} or {} not found", id, otherId);
-            throw new UserNotFoundException("user not found");
+    public List<User> mutualFriends(int id, int friendId) {
+        if (jdbcUserRepository.getById(id).isEmpty()) {
+            log.warn("User with id {} not found", id);
+            throw new UserNotFoundException("User not found");
         }
-        log.info("received mutualFriends between two users with ids {} and {}", id, otherId);
-        return inMemoryUserStorage.getUserById(id).getFriends().stream()
-                .filter(u -> (inMemoryUserStorage.getUserById(otherId)).getFriends().contains(u))
-                .map(inMemoryUserStorage::getUserById)
-                .collect(Collectors.toList());
+        if (jdbcUserRepository.getById(friendId).isEmpty()) {
+            log.warn("User with id {} not found", id);
+            throw new UserNotFoundException("User not found");
+        }
+        List<User> mutualFriends = jdbcUserRepository.mutualFriends(id, friendId);
+        log.info("Retrieved mutualFriends between user userId: {} and friendId {} total: {}", id, friendId, mutualFriends.size());
+        return mutualFriends;
     }
 
     private boolean validateUser(User user) throws ValidationException {
         if (user.getEmail().isBlank()) {
-            log.warn("user email is blank");
-            throw new ValidationException("user email is blank");
+            log.warn("Validation failed: User email is blank");
+            throw new ValidationException("User email is blank");
         }
         if (!user.getEmail().contains("@")) {
-            log.warn("user email: {} not contains @", user.getEmail());
-            throw new ValidationException("user email not contains @");
+            log.warn("Validation failed: User email: {} doesn't contains @", user.getEmail());
+            throw new ValidationException("User email doesn't contains @");
         }
         if (user.getLogin().isBlank()) {
-            log.warn("user login is blank");
-            throw new ValidationException("user login is blank");
+            log.warn("Validation failed: User login is blank");
+            throw new ValidationException("User login is blank");
         }
         if (user.getLogin().contains(" ")) {
-            log.warn("user login: {} contains spaces", user.getLogin());
-            throw new ValidationException("user login contains spaces");
+            log.warn("Validation failed: User login: {} contains spaces", user.getLogin());
+            throw new ValidationException("User login contains spaces");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        if (LocalDate.parse(user.getBirthday(), formatter).isAfter(LocalDate.now())) {
-            log.warn("user birthday: {} is after now", user.getBirthday());
-            throw new ValidationException("user birthday is after now");
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.warn("User birthday: {} is after now", user.getBirthday());
+            throw new ValidationException("User birthday is after now");
         }
         return true;
-    }
-
-    private int generateId() {
-        return generateId++;
     }
 }

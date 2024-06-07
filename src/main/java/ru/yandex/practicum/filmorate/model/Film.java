@@ -1,25 +1,24 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
+import ru.yandex.practicum.filmorate.dto.GenreDto;
+import ru.yandex.practicum.filmorate.dto.LikeDto;
+import ru.yandex.practicum.filmorate.dto.MpaRatingDto;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Film.
- */
 @Data
-@Builder
 @ToString
 public class Film {
-    private final Set<Integer> likes = new HashSet<>();
-    private int id;
+    private long id;
     private String name;
     private String description;
-    private String releaseDate;
+    private LocalDate releaseDate;
     private int duration;
-    private FilmGenre genre;
-    private FilmRating rating;
+    private MpaRatingDto mpa;
+    private List<LikeDto> likes = new ArrayList<>();
+    private List<GenreDto> genres = new ArrayList<>();
 }
