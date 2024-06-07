@@ -86,7 +86,7 @@ public class JdbcUserRepository extends BaseRepository<User> implements UserRepo
         );
     }
 
-    public List<User> commonFriend(int id, int otherId) {
+    public List<User> mutualFriends(int id, int otherId) {
         String query = """
                 SELECT u.USER_ID, u.NAME, u.EMAIL, u.LOGIN, u.BIRTHDAY
                 FROM USERS AS u

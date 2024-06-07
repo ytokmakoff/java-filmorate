@@ -41,7 +41,7 @@ class JdbcGenreRepositoryTest {
     }
 
     @Test
-    void getByIdTest() {
+    void getByIdShouldGetGenreById() {
         Optional<GenreDto> genreDto = jdbc.getById(TEST_ID);
         assertThat(genreDto)
                 .isPresent()
@@ -50,7 +50,7 @@ class JdbcGenreRepositoryTest {
     }
 
     @Test
-    void findAllTest() {
+    void findAllShouldGetAllGenres() {
         List<GenreDto> genreDtoList = jdbc.findAll();
         assertThat(genreDtoList)
                 .isEqualTo(getAllTestGenre());

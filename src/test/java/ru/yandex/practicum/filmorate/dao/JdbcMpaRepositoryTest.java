@@ -40,7 +40,7 @@ class JdbcMpaRepositoryTest {
     }
 
     @Test
-    public void getByIdTest() {
+    public void getByIdShouldReturnMpaById() {
         assertThat(jdbc.getById(TEST_ID))
                 .isPresent()
                 .get()
@@ -48,7 +48,7 @@ class JdbcMpaRepositoryTest {
     }
 
     @Test
-    public void findAllTest() {
+    public void findAllShouldReturnAllMpa() {
         assertThat(jdbc.getAll())
                 .isEqualTo(getAllTestMpa());
     }

@@ -54,7 +54,7 @@ class JdbcUserRepositoryTest {
     }
 
     @Test
-    void getByIdTest() {
+    void getByIdShouldReturnUserById() {
         assertThat(jdbc.getById(USER1_ID))
                 .isPresent()
                 .get()
@@ -62,14 +62,14 @@ class JdbcUserRepositoryTest {
     }
 
     @Test
-    void getAllTest() {
+    void getAllShouldReturnAllUsers() {
         assertThat(jdbc.getAll())
                 .usingRecursiveComparison()
                 .isEqualTo(List.of(getTestUser1(), getTestUser2(), getTestUser3()));
     }
 
     @Test
-    void createTest() {
+    void createShouldCreateNewUser() {
         User user = new User();
         user.setId(NEW_USER_ID);
         user.setName("new user name");
@@ -85,7 +85,7 @@ class JdbcUserRepositoryTest {
     }
 
     @Test
-    void updateTest() {
+    void updateShouldUpdateUser() {
         User newUser = new User();
         newUser.setId(USER1_ID);
         newUser.setEmail("email");
@@ -100,21 +100,25 @@ class JdbcUserRepositoryTest {
     }
 
     @Test
-    void friendsTest() {
+    void shouldAddFriend() {
         jdbc.addFriend(USER1_ID, USER3_ID);
         assertThat(jdbc.getFriends(USER1_ID))
                 .isEqualTo(List.of(getTestUser3()));
+    }
 
+    @Test
+    void shouldReturnMutualFriends() {
+        jdbc.addFriend(USER1_ID, USER3_ID);
         jdbc.addFriend(USER2_ID, USER3_ID);
-
-        assertThat(jdbc.commonFriend(USER1_ID, USER2_ID))
+        assertThat(jdbc.mutualFriends(USER1_ID, USER2_ID))
                 .isEqualTo(List.of(getTestUser3()));
+    }
 
+    @Test
+    void shouldRemoveFriend() {
+        jdbc.addFriend(USER1_ID, USER3_ID);
         jdbc.deleteFriend(USER1_ID, USER3_ID);
-
         assertThat(jdbc.getFriends(USER1_ID))
                 .isEqualTo(List.of());
     }
-
-
 }

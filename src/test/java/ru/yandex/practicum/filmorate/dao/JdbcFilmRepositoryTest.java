@@ -58,7 +58,7 @@ class JdbcFilmRepositoryTest {
     }
 
     @Test
-    void getByIdTest() {
+    void getByIdShouldReturnFilmById() {
         assertThat(jdbc.getById(TEST_FILM1_ID))
                 .isPresent()
                 .usingRecursiveComparison()
@@ -66,7 +66,7 @@ class JdbcFilmRepositoryTest {
     }
 
     @Test
-    void getAllTest() {
+    void getAllShouldReturnAllFilms() {
         List<Film> films = jdbc.getAll();
         assertThat(films)
                 .usingRecursiveComparison()
@@ -74,7 +74,7 @@ class JdbcFilmRepositoryTest {
     }
 
     @Test
-    void updateTest() {
+    void updateShouldUpdateFilm() {
         Film newFilm = new Film();
 
         newFilm.setId(TEST_FILM1_ID);
@@ -89,7 +89,7 @@ class JdbcFilmRepositoryTest {
     }
 
     @Test
-    void addLikeTest() {
+    void addLikeShouldAddLikeToFilm() {
         jdbc.addLike(TEST_FILM1_ID, TEST_USER_ID);
 
         Film expectedFilm = getTestFilm1();
@@ -107,7 +107,7 @@ class JdbcFilmRepositoryTest {
     }
 
     @Test
-    void deleteLikeTest() {
+    void deleteLikeShouldRemoveLikeFromFilm() {
         jdbc.addLike(TEST_FILM1_ID, TEST_USER_ID);
         jdbc.deleteLike(TEST_FILM1_ID, TEST_USER_ID);
         Film expectedFilm = getTestFilm1();
@@ -120,7 +120,7 @@ class JdbcFilmRepositoryTest {
     }
 
     @Test
-    void getPopularTest() {
+    void getPopularShouldReturnPopularFilms() {
         jdbc.addLike(TEST_FILM2_ID, TEST_USER_ID);
 
         assertThat(jdbc.getPopular(2))
@@ -128,7 +128,7 @@ class JdbcFilmRepositoryTest {
     }
 
     @Test
-    void createTest() {
+    void createShouldCreateNewFilm() {
         Film film = new Film();
         film.setName("film");
         film.setDescription("desc");
